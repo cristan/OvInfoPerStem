@@ -148,8 +148,8 @@ private fun MainContent(coordinates: Coordinates?) {
 
 @Preview(showBackground = true)
 @Composable
-fun MainWithoutLocationPreview() {
-    HomeView(HomeContent.Main, null, {})
+fun NeedGpsPermissionPreview() {
+    HomeView(HomeContent.RequireGpsPermission, null, {})
 }
 
 @Preview(showBackground = true)
@@ -160,6 +160,6 @@ fun MainWithLocationPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun NeedGpsPermissionPreview() {
-    HomeView(HomeContent.RequireGpsPermission, null, {})
+fun MainWithoutLocationPreview() {
+    HomeView(HomeContent.Main, null, {})
 }
