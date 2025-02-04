@@ -144,10 +144,22 @@ private fun MainContent(coordinates: Coordinates?, backendTexts: List<String>) {
         )
     }
     Spacer(modifier = Modifier.padding(16.dp))
-    if (coordinates != null) {
-        Text("Location:\n${coordinates.latitude}, ${coordinates.latitude}\n")
-    }
+//    if (coordinates != null) {
+//        Text("Location:\n${coordinates.latitude}, ${coordinates.latitude}\n")
+//    }
     Text(speechText.value, textAlign = TextAlign.Center)
+
+    if(speechText.value != "[Speech recognition failed.]" && speechText.value != "No speech detected." && speechText.value != "Your speech will appear here." ) {
+        Text(
+            "Begin je reis te voet vanaf je startlocatie. Je loopt ongeveer 10 minuten tot je aankomt op Rotterdam Centraal, het eerste station op je reis. Vanaf hier stap je in op de Intercity Direct (ICD) richting Amersfoort Schothorst. De trein vertrekt vanaf spoor 12 om 12:46, wat iets later is dan gepland. Deze treinreis duurt ongeveer 31 minuten.\n" +
+                "\n" +
+                "Zodra je om 13:18 aankomt op Amsterdam Zuid, vervolg je je reis te voet richting het metrostation binnen hetzelfde stationscomplex, een wandeling van een paar minuten. Hier neem je metrolijn 52 richting Noord. De metro vertrekt om 13:25 vanaf Amsterdam Zuid en de rit duurt ongeveer 8 minuten.\n" +
+                "\n" +
+                "Je stapt uit bij de halte Rokin om 13:33. Het laatste deel van je reis leg je te voet af. Dit is een wandeling van ongeveer 14 minuten naar jouw eindbestemming.\n" +
+                "\n" +
+                "Tijdens je reis is het belangrijk om goed te letten op borden en vertrektijden, vooral gezien er enkele vertragingen optreden. Veel reisplezier!",
+            modifier = Modifier.padding(top = 12.dp))
+    }
 
     LazyColumn {
         items(backendTexts) { backendText ->
