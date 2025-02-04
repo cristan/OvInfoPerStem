@@ -1,6 +1,5 @@
 package nl.openov.ovinfoperstem.viewmodel
 
-import PingServiceClient
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import dev.jordond.compass.geolocation.mobile
 import dev.jordond.compass.permissions.LocationPermissionController
 import dev.jordond.compass.permissions.mobile
 import kotlinx.coroutines.launch
+import nl.openov.ovinfoperstem.proto.TravelChatServiceClient
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
@@ -55,16 +55,23 @@ class HomeViewModel(
                 networkProtocol = NetworkProtocol.CONNECT,
             ),
         )
-        val pingServiceClient = PingServiceClient(client)
-        val response =
-            pingServiceClient.serviceAvailable(PingServiceOuterClass.Ping.newBuilder().setMessage("Ping").build())
-        response.success {
-            Timber.d("subscribeToProtobuf: retrieved message ${it.message.message}")
-            _backendTexts.value = backendTexts.value + it.message.message
-        }
-        response.failure { failure ->
-            Timber.e( "subscribeToProtobuf: failure with code ${failure.cause.code} ${failure.cause.cause}")
-        }
+        val travelChatServiceClient = TravelChatServiceClient(client)
+
+
+//        val responseTrailers = travelChatServiceClient.getFeedback().responseTrailers().await().values
+//        Timber.d("subscribeToProtobuf: received trailers: $responseTrailers")
+
+        val feedbackResponse = travelChatServiceClient.getFeedback()
+        Timber.d("subscribeToProtobuf: single response: ${feedbackResponse.responseChannel().receive().sentenceFeedback.message}")
+
+        Timber.d("subscribeToProtobuf: consuming!")
+//        responseChannel.consumeAsFlow().collect { feedback: Feedback ->
+//            Timber.d("subscribeToProtobuf: received message: ${feedback.sentenceFeedback.message}")
+//        }
+//        val responseChannel = travelChatServiceClient.getFeedback().responseChannel()
+//        responseChannel.consumeEach { feedback: Feedback ->
+//            Timber.d("subscribeToProtobuf: received message: ${feedback.sentenceFeedback.message}")
+//        }
     }
 
     private fun getInitialHomeContent() =

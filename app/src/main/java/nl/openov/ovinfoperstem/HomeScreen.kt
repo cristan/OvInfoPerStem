@@ -139,10 +139,10 @@ private fun MainContent(coordinates: Coordinates?, backendTexts: List<String>) {
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Waar wil je naartoe?")
         launcher.launch(intent)
     }) {
+        Text("Spreek in waar je naartoe wilt ")
         Image(
             painter = painterResource(id = R.drawable.baseline_mic_24),
             contentDescription = "Spreek in",
-            modifier = Modifier.size(92.dp),
         )
     }
     Spacer(modifier = Modifier.padding(16.dp))
