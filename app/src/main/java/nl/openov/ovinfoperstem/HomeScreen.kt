@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -46,12 +48,13 @@ fun HomeScreen(
 ) {
     val coordinates by viewModel.coordinates
     val content by viewModel.content
+    val backendTexts by viewModel.backendTexts
 
     LaunchedEffect(Unit) {
         viewModel.onScreenLaunched()
     }
 
-    HomeView(content, coordinates, viewModel::onLoadLocationClicked)
+    HomeView(content, coordinates, backendTexts, viewModel::onLoadLocationClicked)
 }
 
 @Composable
@@ -59,6 +62,7 @@ fun HomeScreen(
 private fun HomeView(
     content: HomeContent,
     coordinates: Coordinates?,
+    backendTexts: List<String>,
     onLocationClicked: () -> Unit,
 ) {
     OvInfoPerStemTheme {
@@ -88,7 +92,7 @@ private fun HomeView(
             ) {
                 when (content) {
                     is HomeContent.Main -> {
-                        MainContent(coordinates)
+                        MainContent(coordinates, backendTexts)
                     }
 
                     HomeContent.RequireGpsPermission -> {
@@ -114,7 +118,7 @@ private fun RequireGpsContent(onLocationClicked: () -> Unit) {
 }
 
 @Composable
-private fun MainContent(coordinates: Coordinates?) {
+private fun MainContent(coordinates: Coordinates?, backendTexts: List<String>) {
     val speechText = remember { mutableStateOf("Your speech will appear here.") }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
@@ -130,7 +134,7 @@ private fun MainContent(coordinates: Coordinates?) {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Go on then, say something.")
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Waar wil je naartoe?")
         launcher.launch(intent)
     }) {
         Image(
@@ -144,22 +148,28 @@ private fun MainContent(coordinates: Coordinates?) {
         Text("Location:\n${coordinates.latitude}, ${coordinates.latitude}\n")
     }
     Text(speechText.value, textAlign = TextAlign.Center)
+
+    LazyColumn {
+        items(backendTexts) { backendText ->
+            Text(backendText)
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun NeedGpsPermissionPreview() {
-    HomeView(HomeContent.RequireGpsPermission, null, {})
+    HomeView(HomeContent.RequireGpsPermission, null, emptyList(), {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MainWithLocationPreview() {
-    HomeView(HomeContent.Main, Coordinates(37.4234423442344234, 37.423442344234), {})
+    HomeView(HomeContent.Main, Coordinates(37.423442344234424, 37.423442344234), emptyList(), {})
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MainWithoutLocationPreview() {
-    HomeView(HomeContent.Main, null, {})
+    HomeView(HomeContent.Main, null, emptyList(), {})
 }

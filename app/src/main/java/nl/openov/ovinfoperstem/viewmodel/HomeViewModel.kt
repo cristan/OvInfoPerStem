@@ -25,6 +25,9 @@ class HomeViewModel(
     private val _coordinates = mutableStateOf<Coordinates?>(null)
     val coordinates: State<Coordinates?> = _coordinates
 
+    private val _backendTexts = mutableStateOf<List<String>>(emptyList())
+    val backendTexts: State<List<String>> = _backendTexts
+
     private val _content = mutableStateOf(
         getInitialHomeContent()
     )
@@ -57,6 +60,7 @@ class HomeViewModel(
             pingServiceClient.serviceAvailable(PingServiceOuterClass.Ping.newBuilder().setMessage("Ping").build())
         response.success {
             Timber.d("subscribeToProtobuf: retrieved message ${it.message.message}")
+            _backendTexts.value = backendTexts.value + it.message.message
         }
         response.failure { failure ->
             Timber.e( "subscribeToProtobuf: failure with code ${failure.cause.code} ${failure.cause.cause}")
