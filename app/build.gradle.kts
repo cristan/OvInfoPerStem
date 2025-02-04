@@ -59,6 +59,10 @@ dependencies {
     implementation(libs.compass.permissions.mobile)
     implementation(libs.play.services.coroutines)
 
+    implementation(libs.connect.kotlin.okhttp)
+    implementation(libs.connect.kotlin.google.java.ext)
+    implementation(libs.protobuf.java)
+
     testImplementation(libs.junit)
     testImplementation(libs.koin.test.junit4)
 

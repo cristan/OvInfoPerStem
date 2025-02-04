@@ -1,15 +1,22 @@
 package nl.openov.ovinfoperstem.viewmodel
 
+import PingServiceClient
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.connectrpc.ProtocolClientConfig
+import com.connectrpc.extensions.GoogleJavaProtobufStrategy
+import com.connectrpc.impl.ProtocolClient
+import com.connectrpc.okhttp.ConnectOkHttpClient
+import com.connectrpc.protocols.NetworkProtocol
 import dev.jordond.compass.Coordinates
 import dev.jordond.compass.geolocation.Geolocator
 import dev.jordond.compass.geolocation.mobile
 import dev.jordond.compass.permissions.LocationPermissionController
 import dev.jordond.compass.permissions.mobile
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import timber.log.Timber
 
 class HomeViewModel(
@@ -27,11 +34,33 @@ class HomeViewModel(
         if (content.value is HomeContent.Main) {
             viewModelScope.launch {
                 loadLocation()
+                subscribeToProtobuf()
             }
         }
 //        else {
 //            onReturnedToScreen()
 //        }
+    }
+
+    private suspend fun subscribeToProtobuf() {
+        Timber.d("subscribeToProtobuf: called at ${System.currentTimeMillis()}")
+        val client = ProtocolClient(
+            httpClient = ConnectOkHttpClient(OkHttpClient()),
+            ProtocolClientConfig(
+                host = "http://pijkeh.nl:9990/",
+                serializationStrategy = GoogleJavaProtobufStrategy(),
+                networkProtocol = NetworkProtocol.CONNECT,
+            ),
+        )
+        val pingServiceClient = PingServiceClient(client)
+        val response =
+            pingServiceClient.serviceAvailable(PingServiceOuterClass.Ping.newBuilder().setMessage("Ping").build())
+        response.success {
+            Timber.d("subscribeToProtobuf: retrieved message ${it.message.message}")
+        }
+        response.failure { failure ->
+            Timber.e( "subscribeToProtobuf: failure with code ${failure.cause.code} ${failure.cause.cause}")
+        }
     }
 
     private fun getInitialHomeContent() =

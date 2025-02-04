@@ -1,5 +1,7 @@
 [versions]
 agp = "8.8.0"
+connectKotlinGoogleJavaExt = "0.7.2"
+connectKotlinOkhttp = "0.7.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -9,6 +11,7 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.0"
 composeBom = "2025.01.01"
 koin-bom = "4.0.2"
+protobufJava = "4.29.3"
 timber = "5.0.1"
 compass = "2.0.0"
 playServicesCoroutines = "1.10.1"
@@ -29,6 +32,10 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+connect-kotlin-okhttp = { module = "com.connectrpc:connect-kotlin-okhttp", version.ref = "connectKotlinOkhttp" }
+connect-kotlin-google-java-ext = { module = "com.connectrpc:connect-kotlin-google-java-ext", version.ref = "connectKotlinGoogleJavaExt" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobufJava" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4" }
