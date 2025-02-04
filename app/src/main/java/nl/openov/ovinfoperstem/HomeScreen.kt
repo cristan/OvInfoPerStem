@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,18 +33,34 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.jordond.compass.Coordinates
 import nl.openov.ovinfoperstem.ui.theme.OvInfoPerStemTheme
+import nl.openov.ovinfoperstem.viewmodel.HomeContent
 import nl.openov.ovinfoperstem.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
-    val location by viewModel.location
+    val coordinates by viewModel.coordinates
+    val content by viewModel.content
 
+    LaunchedEffect(Unit) {
+        viewModel.onScreenLaunched()
+    }
+
+    HomeView(content, coordinates, viewModel::onLoadLocationClicked)
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun HomeView(
+    content: HomeContent,
+    coordinates: Coordinates?,
+    onLocationClicked: () -> Unit,
+) {
     OvInfoPerStemTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -60,56 +78,88 @@ fun HomeScreen(
             },
             contentWindowInsets = WindowInsets(0, 0, 0, 0)
         ) { innerPadding ->
-            val speechText = remember { mutableStateOf("Your speech will appear here.") }
-            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (it.resultCode == Activity.RESULT_OK) {
-                    val data = it.data
-                    val result = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    speechText.value = result?.get(0) ?: "No speech detected."
-                } else {
-                    speechText.value = "[Speech recognition failed.]"
-                }
-            }
-            Column(modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(20.dp)
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Button(onClick = {
-                    viewModel.onLoadLocationClicked()
-                }) {
-                    Text("Load location")
-                }
+                when (content) {
+                    is HomeContent.Main -> {
+                        MainContent(coordinates)
+                    }
 
-                if (location != null) {
-                    Text("Location: ${location?.coordinates?.latitude}, ${location?.coordinates?.latitude}")
+                    HomeContent.RequireGpsPermission -> {
+                        RequireGpsContent(onLocationClicked)
+                    }
                 }
-
-                Button(onClick = {
-                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Go on then, say something.")
-                    launcher.launch(intent)
-                }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.baseline_mic_24),
-                        contentDescription = null,
-                        modifier = Modifier.size(92.dp),
-                    )
-                }
-                Spacer(modifier = Modifier.padding(16.dp))
-                Text(speechText.value, textAlign = TextAlign.Center)
             }
         }
     }
 }
 
+@Composable
+private fun RequireGpsContent(onLocationClicked: () -> Unit) {
+    Icon(
+        painter = painterResource(id = R.drawable.baseline_location_searching_24),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(92.dp),
+    )
+    Button(onClick = onLocationClicked) {
+        Text("Laad je locatie")
+    }
+}
+
+@Composable
+private fun MainContent(coordinates: Coordinates?) {
+    val speechText = remember { mutableStateOf("Your speech will appear here.") }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            val data = it.data
+            val result = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            speechText.value = result?.get(0) ?: "No speech detected."
+        } else {
+            speechText.value = "[Speech recognition failed.]"
+        }
+    }
+
+    Button(onClick = {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Go on then, say something.")
+        launcher.launch(intent)
+    }) {
+        Image(
+            painter = painterResource(id = R.drawable.baseline_mic_24),
+            contentDescription = null,
+            modifier = Modifier.size(92.dp),
+        )
+    }
+    Spacer(modifier = Modifier.padding(16.dp))
+    if (coordinates != null) {
+        Text("Location:\n${coordinates.latitude}, ${coordinates.latitude}\n")
+    }
+    Text(speechText.value, textAlign = TextAlign.Center)
+}
+
 @Preview(showBackground = true)
 @Composable
-fun HomeScreenPreview() {
-    OvInfoPerStemTheme {
-        HomeScreen()
-    }
+fun MainWithoutLocationPreview() {
+    HomeView(HomeContent.Main, null, {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainWithLocationPreview() {
+    HomeView(HomeContent.Main, Coordinates(37.4234423442344234, 37.423442344234), {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NeedGpsPermissionPreview() {
+    HomeView(HomeContent.RequireGpsPermission, null, {})
 }
