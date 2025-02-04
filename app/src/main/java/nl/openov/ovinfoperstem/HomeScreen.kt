@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,11 +32,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import nl.openov.ovinfoperstem.ui.theme.OvInfoPerStemTheme
+import nl.openov.ovinfoperstem.viewmodel.HomeViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel()
+) {
+    val location by viewModel.location
+
     OvInfoPerStemTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -69,6 +76,16 @@ fun HomeScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Button(onClick = {
+                    viewModel.onLoadLocationClicked()
+                }) {
+                    Text("Load location")
+                }
+
+                if (location != null) {
+                    Text("Location: ${location?.coordinates?.latitude}, ${location?.coordinates?.latitude}")
+                }
+
                 Button(onClick = {
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                     intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)

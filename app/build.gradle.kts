@@ -54,7 +54,10 @@ dependencies {
 
     implementation(libs.compass.geocoder)
     implementation(libs.compass.geocoder.mobile)
+    implementation(libs.compass.geolocation)
+    implementation(libs.compass.geolocation.mobile)
     implementation(libs.compass.permissions.mobile)
+    implementation(libs.play.services.coroutines)
 
     testImplementation(libs.junit)
     testImplementation(libs.koin.test.junit4)
