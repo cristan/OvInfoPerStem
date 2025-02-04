@@ -47,7 +47,7 @@ class HomeViewModel(
         val client = ProtocolClient(
             httpClient = ConnectOkHttpClient(OkHttpClient()),
             ProtocolClientConfig(
-                host = "http://pijkeh.nl:9990/",
+                host = "http://86.93.34.246:9990/",
                 serializationStrategy = GoogleJavaProtobufStrategy(),
                 networkProtocol = NetworkProtocol.CONNECT,
             ),
