@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -139,7 +141,7 @@ private fun MainContent(coordinates: Coordinates?, backendTexts: List<String>) {
     }) {
         Image(
             painter = painterResource(id = R.drawable.baseline_mic_24),
-            contentDescription = null,
+            contentDescription = "Spreek in",
             modifier = Modifier.size(92.dp),
         )
     }
@@ -178,6 +180,12 @@ fun NeedGpsPermissionPreview() {
 @Composable
 fun MainWithLocationPreview() {
     HomeView(HomeContent.Main, Coordinates(37.423442344234424, 37.423442344234), emptyList(), {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainWithResultPreview() {
+    HomeView(HomeContent.Main, Coordinates(37.423442344234424, 37.423442344234), listOf("Reply from backend"), {})
 }
 
 @Preview(showBackground = true)
